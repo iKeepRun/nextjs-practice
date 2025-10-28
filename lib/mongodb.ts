@@ -3,12 +3,7 @@ import mongoose from 'mongoose';
 // Define the MongoDB URI from environment variables
 const MONGODB_URI = process.env.MONGODB_URI;
 
-// Throw an error if MONGODB_URI is not defined
-if (!MONGODB_URI) {
-  throw new Error(
-    'Please define the MONGODB_URI environment variable inside .env.local'
-  );
-}
+
 
 /**
  * Global is used here to maintain a cached connection across hot reloads
@@ -45,11 +40,17 @@ async function dbConnect(): Promise<typeof mongoose> {
 
   // Create a new connection promise if one doesn't exist
   if (!cached.promise) {
+    // Throw an error if MONGODB_URI is not defined
+    if (!MONGODB_URI) {
+      throw new Error(
+          'Please define the MONGODB_URI environment variable inside .env.local'
+      );
+    }
     const opts = {
       bufferCommands: false, // Disable buffering to fail fast if not connected
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
       return mongoose;
     });
   }
