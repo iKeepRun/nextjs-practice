@@ -139,7 +139,7 @@ EventSchema.pre('save', function (next) {
     if (!timeRegex.test(this.time)) {
       return next(new Error('Time must be in HH:MM format'));
     }
-    // Normalize to HH:MM format (add leading zero if needed)
+    // Normalize to HH:MM   format (add leading zero if needed)
     const [hours, minutes] = this.time.split(':');
     this.time = `${hours.padStart(2, '0')}:${minutes}`;
   }
