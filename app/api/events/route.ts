@@ -11,30 +11,36 @@ export async function POST(req: NextRequest):Promise<NextResponse> {
 
         const formData = await req.formData();
 
+
+        let event;
         // Type-safe event object built from FormData
-        const event: Record<string, FormDataEntryValue | FormDataEntryValue[]> = {};
+        // const event: Record<string, FormDataEntryValue | FormDataEntryValue[]> = {};
 
         // const event:{[key:string]:FormDataEntryValue | FormDataEntryValue[]}={}
 
         try {
             // 遍历所有表单条目
-            for (const [key, value] of formData.entries()) {
-                // 如果键已经存在，转换为数组
-                if (event[key]) {
-                    // 如果还不是数组，先转换为数组
-                    if (!Array.isArray(event[key])) {
-                        event[key] = [event[key] as FormDataEntryValue];
-                    }
-                    (event[key] as FormDataEntryValue[]).push(value);
-                } else {
-                    event[key] = value;
-                }
-            }
+            // for (const [key, value] of formData.entries()) {
+            //     // 如果键已经存在，转换为数组
+            //     if (event[key]) {
+            //         // 如果还不是数组，先转换为数组
+            //         if (!Array.isArray(event[key])) {
+            //             event[key] = [event[key] as FormDataEntryValue];
+            //         }
+            //         (event[key] as FormDataEntryValue[]).push(value);
+            //     } else {
+            //         event[key] = value;
+            //     }
+            // }
+
+            event=Object.fromEntries(formData.entries());
 
         } catch (e) {
             console.error(e)
             return NextResponse.json({status: 400, message: 'Invalid json data format'})
         }
+        const tags=JSON.parse(formData.get('tags') as string);
+        const agenda=JSON.parse(formData.get('agenda') as  string);
 
         const file = formData.get('image') as File;
         if (!file) return NextResponse.json({status: 400, message: 'Image is required'})
@@ -58,7 +64,7 @@ export async function POST(req: NextRequest):Promise<NextResponse> {
 
         event.image = (uploadResult as{ secure_url:string}).secure_url;
         console.log("传参：",event)
-        const createdEvent = await Event.create(event);
+        const createdEvent = await Event.create({...event,tags:tags,agenda:agenda});
 
         return NextResponse.json({status: 200, message: 'Event created successfully', event: createdEvent})
 
